@@ -2,7 +2,7 @@
 
 | # | Requisito de la guía | Dónde se cumple |
 |---|----------------------|-----------------|
-| 1 | Calculadora con menú principal e ingreso de pares | `MainWindow` + `Sidebar` + `DataView` |
+| 1 | Calculadora con menú principal e ingreso de pares | `MainWindow` (menú/toolbar) + `DataView` |
 | 2 | Validación: misma cantidad x/y, numéricos, n suficiente | `core/validation.py` + mensajes en DataView |
 | 3 | Ajuste lineal: b0, b1, ecuación, SSE, SST, Syx, R², r | `core/regression/linear.py` + `core/metrics.py` + `LinearView` |
 | 4 | Polinomio grado 2: a0,a1,a2, ecuación, ŷ, residuos, SSE | `core/regression/quadratic.py` + `QuadraticView` |

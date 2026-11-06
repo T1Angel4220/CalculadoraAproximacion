@@ -5,24 +5,20 @@ Fuente de verdad para la GUI. Cualquier cambio de ventana, estado o hilos debe a
 ## Estructura de ventana
 
 - **Contenedor:** `QMainWindow` (`aproxlab.ui.main_window.MainWindow`).
-- **Por qué:** menú (archivo, tema, ayuda), barra de estado, navegación persistente y un área central intercambiable.
+- **Por qué:** menú, barra de herramientas y un banco de trabajo (datos + resultados + gráficas a la vez).
 - **No usar:** QML/Qt Quick, `QDialog` como ventana principal, posicionamiento absoluto.
 
 ## Árbol de composición
 
 ```text
 MainWindow
-├── MenuBar (Archivo, Ver, Ayuda)
-├── StatusBar
-└── CentralWidget (QWidget + QHBoxLayout)
-    ├── Sidebar (navegación: Datos, Lineal, Cuadrático, Comparación, Gráficas, Fórmulas)
-    └── QStackedWidget
-        ├── DataView (tabla x,y + acciones + estado vacío/error)
-        ├── LinearView (ecuación + tarjetas de indicadores)
-        ├── QuadraticView (coeficientes, ŷ, residuos)
-        ├── ComparisonView (tabla de métricas + conclusión)
-        ├── ChartsView (tres pestañas Matplotlib)
-        └── FormulasView (explicación de indicadores)
+├── MenuBar + ToolBar (Ajustar, CSV, ejemplos)
+├── StatusBar (n, SSE, ganador)
+└── QSplitter horizontal
+    ├── DataView (tabla x,y compacta)
+    └── QSplitter vertical
+        ├── QTabWidget: Lineal | Cuadrático | Comparación | Referencia
+        └── ChartsView (Recta | Parábola | Ambos)
 ```
 
 ## Propiedad del estado

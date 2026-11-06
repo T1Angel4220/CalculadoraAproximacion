@@ -1,16 +1,9 @@
-"""Ingreso, edición y validación visual de pares (x, y)."""
+"""Ingreso compacto de pares (x, y)."""
 
 from __future__ import annotations
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QTableView,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QTableView, QVBoxLayout, QWidget
 
 from aproxlab.core.exceptions import DatasetError
 from aproxlab.ui.widgets.dataset_model import DatasetTableModel
@@ -22,13 +15,14 @@ class DataView(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.model = DatasetTableModel(self)
-        title = QLabel("Ingreso de datos")
-        title.setObjectName("Title")
-        subtitle = QLabel(
-            "Agregue pares (x, y) numéricos. Ambos vectores deben tener la misma longitud."
-        )
-        subtitle.setObjectName("Subtitle")
-        subtitle.setWordWrap(True)
+        heading = QLabel("Observaciones")
+        heading.setObjectName("Title")
+        self._count = QLabel("n = 0")
+        self._count.setObjectName("Subtitle")
+        header = QHBoxLayout()
+        header.addWidget(heading)
+        header.addStretch()
+        header.addWidget(self._count)
 
         self._error = QLabel("")
         self._error.setObjectName("Error")
@@ -38,11 +32,16 @@ class DataView(QWidget):
         self._table.setModel(self.model)
         self._table.setAlternatingRowColors(True)
         self._table.horizontalHeader().setStretchLastSection(True)
+        self._table.verticalHeader().setDefaultSectionSize(24)
+        self.model.dataChanged.connect(lambda *_: self._refresh_count())
+        self.model.modelReset.connect(self._refresh_count)
+        self.model.rowsInserted.connect(lambda *_: self._refresh_count())
+        self.model.rowsRemoved.connect(lambda *_: self._refresh_count())
 
-        add_btn = QPushButton("Agregar fila")
-        del_btn = QPushButton("Eliminar fila")
+        add_btn = QPushButton("Fila +")
+        del_btn = QPushButton("Fila −")
         del_btn.setObjectName("Danger")
-        calc_btn = QPushButton("Calcular ajustes")
+        calc_btn = QPushButton("Ajustar")
         calc_btn.setObjectName("Primary")
         add_btn.clicked.connect(self.model.add_row)
         del_btn.clicked.connect(self._remove_selected)
@@ -51,15 +50,16 @@ class DataView(QWidget):
         buttons = QHBoxLayout()
         buttons.addWidget(add_btn)
         buttons.addWidget(del_btn)
-        buttons.addStretch()
-        buttons.addWidget(calc_btn)
+        buttons.addWidget(calc_btn, 1)
 
         layout = QVBoxLayout(self)
-        layout.addWidget(title)
-        layout.addWidget(subtitle)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(6)
+        layout.addLayout(header)
         layout.addWidget(self._error)
         layout.addWidget(self._table, 1)
         layout.addLayout(buttons)
+        self._refresh_count()
 
     def show_error(self, message: str) -> None:
         self._error.setText(message)
@@ -70,9 +70,22 @@ class DataView(QWidget):
     def load_pairs(self, x: list[float], y: list[float]) -> None:
         self.model.set_pairs(x, y)
         self.clear_error()
+        self._refresh_count()
 
     def current_pairs(self) -> tuple[list[float], list[float]]:
         return self.model.numeric_pairs()
+
+    def _refresh_count(self) -> None:
+        filled = 0
+        for row in range(self.model.rowCount()):
+            x_idx = self.model.index(row, 0)
+            y_idx = self.model.index(row, 1)
+            if (
+                str(self.model.data(x_idx) or "").strip()
+                or str(self.model.data(y_idx) or "").strip()
+            ):
+                filled += 1
+        self._count.setText(f"n ≈ {filled}")
 
     def _remove_selected(self) -> None:
         rows = {index.row() for index in self._table.selectionModel().selectedIndexes()}

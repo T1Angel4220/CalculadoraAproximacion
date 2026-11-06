@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None) -> None:
-        figure = Figure(figsize=(6.4, 4.0), layout="tight")
+        figure = Figure(figsize=(5.4, 3.1), layout="tight")
         super().__init__(figure)
         self.setParent(parent)
         self.axes = figure.add_subplot(111)

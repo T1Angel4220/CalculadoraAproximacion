@@ -1,12 +1,11 @@
-"""Resultados del ajuste polinomial de segundo grado."""
+"""Resultados del polinomio de grado 2, con residuos en tabla."""
 
 from __future__ import annotations
 
 from PySide6.QtWidgets import (
-    QGridLayout,
+    QAbstractItemView,
     QHeaderView,
     QLabel,
-    QScrollArea,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -15,53 +14,66 @@ from PySide6.QtWidgets import (
 
 from aproxlab.services.analysis import AnalysisReport
 from aproxlab.ui.formatters import fmt_number
-from aproxlab.ui.widgets.metric_card import MetricCard
+from aproxlab.ui.widgets.math_label import MathLabel
+from aproxlab.ui.widgets.parameter_table import ParameterTable
+
+_ROWS = [
+    ("a₀", "Término independiente"),
+    ("a₁", "Coeficiente lineal"),
+    ("a₂", "Coeficiente cuadrático"),
+    ("SSE", "Suma de cuadrados de residuos"),
+    ("Sᵧₓ", "Error estándar, ν = n − 3"),
+    ("R²", "Coeficiente de determinación"),
+]
 
 
 class QuadraticView(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        title = QLabel("Ajuste cuadrático")
-        title.setObjectName("Title")
-        self._empty = QLabel("Ingrese al menos tres puntos con x distintos y calcule los ajustes.")
-        self._empty.setObjectName("Subtitle")
-        self._equation = QLabel("")
-        self._equation.setObjectName("Equation")
-        self._cards = {
-            "a0": MetricCard("a0"),
-            "a1": MetricCard("a1"),
-            "a2": MetricCard("a2"),
-            "sse": MetricCard("SSE (residuos)"),
-        }
-        grid = QGridLayout()
-        for i, card in enumerate(self._cards.values()):
-            grid.addWidget(card, 0, i)
-
+        self._hint = QLabel("Requiere n ≥ 3 y al menos tres x distintos.")
+        self._hint.setObjectName("Subtitle")
+        self._math = MathLabel(r"\hat{y} = a_0 + a_1 x + a_2 x^{2}")
+        self._params = ParameterTable(_ROWS)
         self._table = QTableWidget(0, 5)
-        self._table.setHorizontalHeaderLabels(["x", "y", "ŷ", "residuo", "residuo²"])
+        self._table.setHorizontalHeaderLabels(["x", "y", "ŷ", "eᵢ", "eᵢ²"])
+        self._table.verticalHeader().hide()
+        self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self._table.setAlternatingRowColors(True)
         self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self._table.verticalHeader().setDefaultSectionSize(22)
 
-        inner = QWidget()
-        inner_layout = QVBoxLayout(inner)
-        inner_layout.addWidget(title)
-        inner_layout.addWidget(self._empty)
-        inner_layout.addWidget(self._equation)
-        inner_layout.addLayout(grid)
-        inner_layout.addWidget(QLabel("Valores aproximados y residuos"))
-        inner_layout.addWidget(self._table)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(inner)
         layout = QVBoxLayout(self)
-        layout.addWidget(scroll)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(6)
+        layout.addWidget(self._hint)
+        layout.addWidget(self._math)
+        layout.addWidget(self._params)
+        layout.addWidget(QLabel("Residuos eᵢ = yᵢ − ŷᵢ"))
+        layout.addWidget(self._table, 1)
+
+    def set_ink(self, color: str) -> None:
+        self._math.set_latex(self._math._latex, color=color)
 
     def show_report(self, report: AnalysisReport) -> None:
         fit = report.quadratic
-        self._empty.setText("Polinomio y = a0 + a1 x + a2 x²")
-        self._equation.setText(fit.equation)
-        for i, key in enumerate(("a0", "a1", "a2")):
-            self._cards[key].set_value(fmt_number(float(fit.coefficients[i])))
-        self._cards["sse"].set_value(fmt_number(report.quadratic_metrics.sse))
+        metrics = report.quadratic_metrics
+        coeffs = [float(c) for c in fit.coefficients]
+        self._hint.setText(f"MCO grado 2 · n = {report.x.size} · p = 3")
+        self._math.set_latex(
+            rf"\hat{{y}} = {fmt_number(coeffs[0])}"
+            rf" + ({fmt_number(coeffs[1])})\,x"
+            rf" + ({fmt_number(coeffs[2])})\,x^{{2}}"
+        )
+        self._params.set_values(
+            [
+                fmt_number(coeffs[0]),
+                fmt_number(coeffs[1]),
+                fmt_number(coeffs[2]),
+                fmt_number(metrics.sse),
+                fmt_number(metrics.std_error),
+                fmt_number(metrics.r_squared),
+            ]
+        )
         n = report.x.size
         self._table.setRowCount(n)
         for i in range(n):
