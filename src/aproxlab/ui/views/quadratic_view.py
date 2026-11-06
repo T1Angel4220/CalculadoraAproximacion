@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QFrame,
+    QGridLayout,
     QHeaderView,
     QLabel,
     QTableWidget,
@@ -15,16 +17,8 @@ from PySide6.QtWidgets import (
 from aproxlab.services.analysis import AnalysisReport
 from aproxlab.ui.formatters import fmt_number
 from aproxlab.ui.widgets.math_label import MathLabel
-from aproxlab.ui.widgets.parameter_table import ParameterTable
+from aproxlab.ui.widgets.metric_card import MetricCard
 from aproxlab.ui.widgets.table_fit import configure_report_table
-
-_ROWS = [
-    ("a₀", "Primer coeficiente"),
-    ("a₁", "Segundo coeficiente"),
-    ("a₂", "Tercer coeficiente"),
-    ("Ecuación", "Polinomio obtenido"),
-    ("SSE", "Suma de cuadrados de los residuos"),
-]
 
 
 class QuadraticView(QWidget):
@@ -33,7 +27,27 @@ class QuadraticView(QWidget):
         self._hint = QLabel("Requiere n ≥ 3 y al menos tres valores distintos de x.")
         self._hint.setObjectName("Subtitle")
         self._math = MathLabel(r"\hat{y} = a_0 + a_1 x + a_2 x^{2}")
-        self._params = ParameterTable(_ROWS)
+        eq_box = QFrame()
+        eq_box.setObjectName("Card")
+        eq_layout = QVBoxLayout(eq_box)
+        eq_caption = QLabel("Ecuación polinomial obtenida")
+        eq_caption.setObjectName("MetricName")
+        eq_layout.addWidget(eq_caption)
+        eq_layout.addWidget(self._math)
+
+        self._cards = {
+            "a0": MetricCard("a₀", "Primer coeficiente"),
+            "a1": MetricCard("a₁", "Segundo coeficiente"),
+            "a2": MetricCard("a₂", "Tercer coeficiente"),
+            "sse": MetricCard("SSE", "Suma de cuadrados de los residuos"),
+        }
+        grid = QGridLayout()
+        grid.setSpacing(10)
+        grid.addWidget(self._cards["a0"], 0, 0)
+        grid.addWidget(self._cards["a1"], 0, 1)
+        grid.addWidget(self._cards["a2"], 1, 0)
+        grid.addWidget(self._cards["sse"], 1, 1)
+
         self._residuos_label = QLabel("Valores aproximados (ŷ) y residuos")
         self._residuos_label.setObjectName("Title")
         self._table = QTableWidget(0, 5)
@@ -43,11 +57,11 @@ class QuadraticView(QWidget):
         self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(8)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
         layout.addWidget(self._hint)
-        layout.addWidget(self._math)
-        layout.addWidget(self._params)
+        layout.addWidget(eq_box)
+        layout.addLayout(grid)
         layout.addWidget(self._residuos_label)
         layout.addWidget(self._table, 1)
 
@@ -63,15 +77,10 @@ class QuadraticView(QWidget):
             rf" + ({fmt_number(coeffs[1])})\,x"
             rf" + ({fmt_number(coeffs[2])})\,x^{{2}}"
         )
-        self._params.set_values(
-            [
-                fmt_number(coeffs[0]),
-                fmt_number(coeffs[1]),
-                fmt_number(coeffs[2]),
-                fit.equation,
-                fmt_number(report.quadratic_metrics.sse),
-            ]
-        )
+        self._cards["a0"].set_value(fmt_number(coeffs[0]))
+        self._cards["a1"].set_value(fmt_number(coeffs[1]))
+        self._cards["a2"].set_value(fmt_number(coeffs[2]))
+        self._cards["sse"].set_value(fmt_number(report.quadratic_metrics.sse))
         n = report.x.size
         self._table.setRowCount(n)
         for i in range(n):

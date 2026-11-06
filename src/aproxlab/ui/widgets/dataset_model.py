@@ -5,6 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 
 from aproxlab.core.exceptions import InsufficientDataError, NonNumericDataError
+from aproxlab.ui.widgets.numeric_delegate import is_allowed_number_text
 
 _HEADERS = ("x", "y")
 
@@ -46,7 +47,10 @@ class DatasetTableModel(QAbstractTableModel):
     def setData(self, index: QModelIndex, value, role: int = Qt.ItemDataRole.EditRole) -> bool:  # noqa: N802
         if not index.isValid() or role != Qt.ItemDataRole.EditRole:
             return False
-        self._rows[index.row()][index.column()] = str(value).strip()
+        text = str(value).strip()
+        if text and not is_allowed_number_text(text):
+            return False
+        self._rows[index.row()][index.column()] = text
         self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
         return True
 

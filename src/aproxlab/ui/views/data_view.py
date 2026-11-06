@@ -2,17 +2,21 @@
 
 from __future__ import annotations
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QTableView, QVBoxLayout, QWidget
 
 from aproxlab.core.exceptions import DatasetError
 from aproxlab.ui.widgets.dataset_model import DatasetTableModel
+from aproxlab.ui.widgets.numeric_delegate import NumericDelegate
 
 
 class DataView(QWidget):
+    fit_requested = Signal()
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.model = DatasetTableModel(self)
-        heading = QLabel("Datos (x, y)")
+        heading = QLabel("Ingreso de datos")
         heading.setObjectName("Title")
         self._count = QLabel("n = 0")
         self._count.setObjectName("Subtitle")
@@ -27,9 +31,10 @@ class DataView(QWidget):
 
         self._table = QTableView()
         self._table.setModel(self.model)
+        self._table.setItemDelegate(NumericDelegate(self._table))
         self._table.setAlternatingRowColors(True)
         self._table.horizontalHeader().setStretchLastSection(True)
-        self._table.verticalHeader().setDefaultSectionSize(26)
+        self._table.verticalHeader().setDefaultSectionSize(30)
         self.model.dataChanged.connect(lambda *_: self._refresh_count())
         self.model.modelReset.connect(self._refresh_count)
         self.model.rowsInserted.connect(lambda *_: self._refresh_count())
@@ -41,17 +46,23 @@ class DataView(QWidget):
         add_btn.clicked.connect(self.model.add_row)
         del_btn.clicked.connect(self._remove_selected)
 
+        fit_btn = QPushButton("Ajustar  (F5)")
+        fit_btn.setObjectName("Primary")
+        fit_btn.setMinimumHeight(42)
+        fit_btn.clicked.connect(self.fit_requested.emit)
+
         buttons = QHBoxLayout()
         buttons.addWidget(add_btn)
         buttons.addWidget(del_btn)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 8)
-        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
         layout.addLayout(header)
         layout.addWidget(self._error)
         layout.addWidget(self._table, 1)
         layout.addLayout(buttons)
+        layout.addWidget(fit_btn)
         self._refresh_count()
 
     def show_error(self, message: str) -> None:

@@ -13,7 +13,7 @@ QWidget {
     background-color: #101418;
     color: #e7ecf3;
     font-family: "Segoe UI", "Inter", sans-serif;
-    font-size: 12px;
+    font-size: 14px;
 }
 QMainWindow, QMenuBar, QMenu, QToolBar {
     background-color: #101418;
@@ -48,7 +48,8 @@ QPushButton:hover { background-color: #2a3440; }
 QPushButton#Primary {
     background-color: #0e7490;
     border: none;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 15px;
 }
 QPushButton#Primary:hover { background-color: #155e75; }
 QPushButton#Danger { background-color: #7f1d1d; border: none; }
@@ -60,24 +61,44 @@ QTableView, QTableWidget {
     border: 1px solid #2a3440;
     border-radius: 4px;
     font-family: "Cascadia Mono", "Consolas", monospace;
-    font-size: 12px;
+    font-size: 13px;
 }
-QTableView::item, QTableWidget::item { padding: 6px 10px; }
+QTableView::item, QTableWidget::item { padding: 8px 12px; }
 QHeaderView::section {
     background-color: #1c2430;
     color: #c5d0dc;
-    padding: 4px 6px;
+    padding: 8px 10px;
     border: none;
     border-right: 1px solid #2a3440;
     font-family: "Segoe UI", sans-serif;
+    font-size: 13px;
 }
-QLabel#Title { font-size: 13px; font-weight: 600; }
-QLabel#Subtitle { color: #8b9aab; font-size: 11px; }
-QLabel#Error { color: #fca5a5; }
+QLabel#Title { font-size: 16px; font-weight: 700; }
+QLabel#Subtitle { color: #9aa8b8; font-size: 13px; }
+QLabel#Error { color: #fca5a5; font-size: 13px; }
+QLabel#MetricSymbol { font-size: 15px; font-weight: 700; color: #67e8f9; }
+QLabel#MetricName { color: #c5d0dc; font-size: 14px; }
+QLabel#MetricValue {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    color: #f8fafc;
+}
+QLabel#Analysis { font-size: 14px; color: #c5d0dc; }
+QLabel#WinnerText { font-size: 16px; font-weight: 600; }
+QFrame#Winner {
+    background-color: #0f3d3a;
+    border: 1px solid #14b8a6;
+    border-radius: 8px;
+    padding: 4px;
+}
 QTabWidget::pane { border: 1px solid #2a3440; }
 QTabBar::tab {
     background: #161c24;
-    padding: 5px 10px;
+    padding: 10px 22px;
+    min-width: 140px;
+    font-size: 15px;
+    font-weight: 700;
     border: 1px solid #2a3440;
     border-bottom: none;
 }
@@ -102,7 +123,7 @@ QWidget {
     background-color: #f3f5f8;
     color: #0f172a;
     font-family: "Segoe UI", "Inter", sans-serif;
-    font-size: 12px;
+    font-size: 14px;
 }
 QMainWindow, QMenuBar, QMenu, QToolBar {
     background-color: #f3f5f8;
@@ -138,7 +159,8 @@ QPushButton#Primary {
     background-color: #0e7490;
     color: #ffffff;
     border: none;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 15px;
 }
 QPushButton#Danger { background-color: #b91c1c; color: #ffffff; border: none; }
 QTableView, QTableWidget {
@@ -150,20 +172,42 @@ QTableView, QTableWidget {
     border: 1px solid #d5dde6;
     border-radius: 4px;
     font-family: "Cascadia Mono", "Consolas", monospace;
-    font-size: 12px;
+    font-size: 13px;
 }
-QTableView::item, QTableWidget::item { padding: 6px 10px; }
+QTableView::item, QTableWidget::item { padding: 8px 12px; }
 QHeaderView::section {
     background-color: #e8edf3;
     color: #334155;
-    padding: 4px 6px;
+    padding: 8px 10px;
     border: none;
     font-family: "Segoe UI", sans-serif;
+    font-size: 13px;
 }
-QLabel#Title { font-size: 13px; font-weight: 600; }
-QLabel#Subtitle { color: #64748b; font-size: 11px; }
-QLabel#Error { color: #b91c1c; }
-QTabBar::tab { background: #e8edf3; padding: 5px 10px; }
+QLabel#Title { font-size: 16px; font-weight: 700; }
+QLabel#Subtitle { color: #64748b; font-size: 13px; }
+QLabel#Error { color: #b91c1c; font-size: 13px; }
+QLabel#MetricSymbol { font-size: 15px; font-weight: 700; color: #0e7490; }
+QLabel#MetricName { color: #334155; font-size: 14px; }
+QLabel#MetricValue {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    color: #0f172a;
+}
+QLabel#Analysis { font-size: 14px; color: #334155; }
+QLabel#WinnerText { font-size: 16px; font-weight: 600; }
+QFrame#Winner {
+    background-color: #ecfdf5;
+    border: 1px solid #14b8a6;
+    border-radius: 8px;
+}
+QTabBar::tab {
+    background: #e8edf3;
+    padding: 10px 22px;
+    min-width: 140px;
+    font-size: 15px;
+    font-weight: 700;
+}
 QTabBar::tab:selected { background: #0e7490; color: #ffffff; }
 QScrollArea { border: none; }
 QSplitter::handle { background: #d5dde6; }

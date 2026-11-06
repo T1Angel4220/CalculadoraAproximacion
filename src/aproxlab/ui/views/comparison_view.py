@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QFrame,
     QHeaderView,
     QLabel,
     QTableWidget,
@@ -20,9 +21,16 @@ from aproxlab.ui.widgets.table_fit import configure_report_table, fit_table_heig
 class ComparisonView(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self._verdict = QLabel("Calcule un ajuste para comparar los dos modelos.")
+        self._verdict = QLabel("Mejor ajuste")
         self._verdict.setObjectName("Title")
-        self._verdict.setWordWrap(True)
+        self._winner = QLabel("Calcule un ajuste para comparar los dos modelos.")
+        self._winner.setObjectName("WinnerText")
+        self._winner.setWordWrap(True)
+        badge = QFrame()
+        badge.setObjectName("Winner")
+        badge_layout = QVBoxLayout(badge)
+        badge_layout.addWidget(self._verdict)
+        badge_layout.addWidget(self._winner)
 
         self._table = QTableWidget(2, 5)
         self._table.setHorizontalHeaderLabels(["Modelo", "Ecuación", "SSE (error)", "Syx", "R²"])
@@ -30,14 +38,14 @@ class ComparisonView(QWidget):
         fit_table_height(self._table)
 
         self._analysis = QLabel("")
-        self._analysis.setObjectName("Subtitle")
+        self._analysis.setObjectName("Analysis")
         self._analysis.setWordWrap(True)
         self._analysis.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(8)
-        layout.addWidget(self._verdict)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(12)
+        layout.addWidget(badge)
         layout.addWidget(self._table)
         layout.addWidget(self._analysis)
         layout.addStretch(1)
@@ -83,12 +91,9 @@ class ComparisonView(QWidget):
         fit_table_height(self._table)
 
         if winner == "Empate":
-            self._verdict.setText(
-                "Menor error: empate. Ambos modelos tienen el mismo SSE; "
-                "la parábola se reduce a la recta (a₂ ≈ 0)."
-            )
+            self._winner.setText("Empate: mismo SSE. La parábola se reduce a la recta (a₂ ≈ 0).")
         else:
-            self._verdict.setText(f"Menor error de ajuste (SSE): {winner}.")
+            self._winner.setText(f"El modelo {winner} presenta menor SSE para estos datos.")
 
         self._analysis.setText(
             _analysis_text(winner, m_lin.sse, m_quad.sse, m_lin.r_squared, m_quad.r_squared)
@@ -102,13 +107,10 @@ def _analysis_text(
     r2_lin: float | None,
     r2_quad: float | None,
 ) -> str:
-    r2l = fmt_number(r2_lin)
-    r2q = fmt_number(r2_quad)
     return (
-        f"SSE lineal = {fmt_number(sse_lin)}; SSE cuadrático = {fmt_number(sse_quad)}. "
-        f"R² lineal = {r2l}; R² cuadrático = {r2q}. "
-        "El polinomio de grado 2 incluye a la recta como caso particular (a₂ = 0), "
-        "así que un SSE menor no garantiza por sí solo mejor predicción fuera de la muestra. "
-        "La gráfica comparativa debe coincidir con estos indicadores: "
-        f"el modelo con menor SSE es {winner}."
+        f"SSE lineal = {fmt_number(sse_lin)}   ·   SSE cuadrático = {fmt_number(sse_quad)}\n"
+        f"R² lineal = {fmt_number(r2_lin)}   ·   R² cuadrático = {fmt_number(r2_quad)}\n\n"
+        "El polinomio de grado 2 incluye a la recta como caso particular (a₂ = 0). "
+        "Un SSE menor en la muestra no garantiza por sí solo mejor predicción fuera de ella. "
+        f"Con los indicadores y la gráfica comparativa, el menor error de ajuste es: {winner}."
     )

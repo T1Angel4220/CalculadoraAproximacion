@@ -7,6 +7,7 @@ from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
+    QLabel,
     QMainWindow,
     QMessageBox,
     QSplitter,
@@ -49,6 +50,8 @@ class MainWindow(QMainWindow):
         self._results.addTab(self._quadratic, "Cuadrático")
         self._results.addTab(self._comparison, "Comparación")
         self._results.addTab(self._formulas, "Referencia")
+        self._results.tabBar().setExpanding(True)
+        self._results.setDocumentMode(True)
 
         self._results.setMinimumHeight(300)
         results_split = QSplitter(Qt.Orientation.Vertical)
@@ -80,16 +83,17 @@ class MainWindow(QMainWindow):
         presenter.analysis_ready.connect(self._on_ready)
         presenter.analysis_failed.connect(self._on_failed)
         presenter.dataset_loaded.connect(self._on_dataset_loaded)
+        self._data.fit_requested.connect(self._fit_from_table)
+        fit_shortcut = QAction(self)
+        fit_shortcut.setShortcut(QKeySequence("F5"))
+        fit_shortcut.triggered.connect(self._fit_from_table)
+        self.addAction(fit_shortcut)
 
     def _build_toolbar(self) -> None:
         bar = QToolBar("Principal")
         bar.setMovable(False)
         self.addToolBar(bar)
-        bar.addAction(self._action("Ajustar", self._fit_from_table, QKeySequence("F5")))
-        bar.addSeparator()
-        bar.addAction(self._action("CSV…", self._import_csv, QKeySequence.StandardKey.Open))
-        bar.addAction(self._action("PNG…", self._export_chart))
-        bar.addSeparator()
+        bar.addWidget(QLabel(" Ejemplos "))
         self._examples = QComboBox()
         self._examples.addItem("Conjunto de ejemplo…", "")
         for example in EXAMPLES:
@@ -99,7 +103,6 @@ class MainWindow(QMainWindow):
 
     def _build_menus(self) -> None:
         file_menu = self.menuBar().addMenu("&Archivo")
-        file_menu.addAction(self._action("Importar CSV…", self._import_csv))
         file_menu.addAction(self._action("Exportar resultados…", self._export_report))
         file_menu.addAction(self._action("Exportar gráfica PNG…", self._export_chart))
         file_menu.addAction(self._action("Exportar las tres gráficas…", self._export_all_charts))
@@ -170,11 +173,6 @@ class MainWindow(QMainWindow):
 
     def _load_example(self, key: str) -> None:
         self._presenter.load_example(key)
-
-    def _import_csv(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, "Importar CSV", "", "CSV (*.csv);;Todos (*.*)")
-        if path:
-            self._presenter.load_csv(path)
 
     def _export_report(self) -> None:
         path, _ = QFileDialog.getSaveFileName(
