@@ -26,7 +26,7 @@ class LinearRegression:
         design = np.column_stack((np.ones(x_arr.size), x_arr))
         if np.linalg.matrix_rank(design) < 2:
             raise DegenerateDesignError(
-                "No se puede ajustar una recta: las columnas de diseño son linealmente dependientes."
+                "No se puede ajustar una recta: las columnas de diseño son dependientes."
             )
         coeffs, *_ = np.linalg.lstsq(design, y_arr, rcond=None)
         y_hat = design @ coeffs

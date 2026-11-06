@@ -32,8 +32,7 @@ def prepare_dataset(
     distinct = np.unique(x_arr).size
     if distinct < min_distinct_x:
         raise DegenerateDesignError(
-            f"Se requieren al menos {min_distinct_x} valores distintos de x "
-            f"(hay {distinct})."
+            f"Se requieren al menos {min_distinct_x} valores distintos de x (hay {distinct})."
         )
     return x_arr, y_arr
 
@@ -50,9 +49,7 @@ def _to_finite_vector(values: ArrayLike, *, axis_name: str) -> np.ndarray:
     try:
         array = np.asarray(list(values), dtype=float)
     except (TypeError, ValueError) as exc:
-        raise NonNumericDataError(
-            f"Todos los valores de {axis_name} deben ser numéricos."
-        ) from exc
+        raise NonNumericDataError(f"Todos los valores de {axis_name} deben ser numéricos.") from exc
     if array.ndim != 1:
         raise NonNumericDataError(f"{axis_name} debe ser un vector unidimensional.")
     if not np.all(np.isfinite(array)):

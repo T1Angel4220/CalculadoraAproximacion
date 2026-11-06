@@ -31,12 +31,8 @@ class AnalysisService:
         x_arr, y_arr = prepare_dataset(x, y, min_distinct_x=2)
         linear = create_strategy("linear").fit(x_arr, y_arr)
         quadratic = create_strategy("quadratic").fit(x_arr, y_arr)
-        linear_metrics = compute_metrics(
-            y_arr, linear.y_hat, parameter_count=2, x=x_arr
-        )
-        quadratic_metrics = compute_metrics(
-            y_arr, quadratic.y_hat, parameter_count=3, x=x_arr
-        )
+        linear_metrics = compute_metrics(y_arr, linear.y_hat, parameter_count=2, x=x_arr)
+        quadratic_metrics = compute_metrics(y_arr, quadratic.y_hat, parameter_count=3, x=x_arr)
         comparison = compare_models(
             [
                 (linear.name, linear_metrics),
