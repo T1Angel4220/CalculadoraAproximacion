@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 
 from aproxlab.core.exceptions import DatasetError
 from aproxlab.services.analysis import AnalysisReport
+from aproxlab.services.charts import plot_palette
 from aproxlab.services.examples import EXAMPLES
 from aproxlab.ui.controllers.analysis_presenter import AnalysisPresenter
 from aproxlab.ui.formatters import fmt_number
@@ -44,6 +45,7 @@ class MainWindow(QMainWindow):
         self._comparison = ComparisonView()
         self._formulas = FormulasView()
         self._charts = ChartsView()
+        self._charts.set_palette(plot_palette(self._theme))
 
         self._results = QTabWidget()
         self._results.addTab(self._linear, "Lineal")
@@ -59,7 +61,7 @@ class MainWindow(QMainWindow):
         results_split.addWidget(self._charts)
         results_split.setStretchFactor(0, 3)
         results_split.setStretchFactor(1, 2)
-        results_split.setSizes([520, 280])
+        results_split.setSizes([420, 380])
         results_split.setChildrenCollapsible(False)
 
         self._data.setMinimumWidth(250)
@@ -211,12 +213,11 @@ class MainWindow(QMainWindow):
         self._theme = name
         apply_theme(qt_app, name)
         color = ink_color(name)
+        self._charts.set_palette(plot_palette(name))
         self._linear.set_ink(color)
         self._quadratic.set_ink(color)
         self._comparison.set_ink(color)
         self._formulas.set_ink(color)
-        if self._presenter.last_report is not None:
-            self._charts.show_report(self._presenter.last_report)
 
     def _about(self) -> None:
         QMessageBox.about(

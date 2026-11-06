@@ -7,11 +7,11 @@ from matplotlib.figure import Figure
 
 
 class MplCanvas(FigureCanvasQTAgg):
-    def __init__(self, parent=None) -> None:
-        figure = Figure(figsize=(5.4, 3.1), layout="tight")
+    def __init__(self, parent=None, *, width: float = 7.2, height: float = 4.4) -> None:
+        figure = Figure(figsize=(width, height), layout="constrained")
         super().__init__(figure)
         self.setParent(parent)
         self.axes = figure.add_subplot(111)
 
     def save_png(self, path: str) -> None:
-        self.figure.savefig(path, dpi=140)
+        self.figure.savefig(path, dpi=150)

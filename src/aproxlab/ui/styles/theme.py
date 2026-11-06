@@ -1,9 +1,11 @@
-"""Temas claro/oscuro y sincronización con Matplotlib."""
+"""Temas claro/oscuro y paleta de gráficas."""
 
 from __future__ import annotations
 
 from matplotlib import rcParams
 from PySide6.QtWidgets import QApplication
+
+from aproxlab.services.charts import plot_palette
 
 INK_DARK = "#e7ecf3"
 INK_LIGHT = "#0f172a"
@@ -229,25 +231,23 @@ def apply_theme(app: QApplication, name: str) -> None:
     """Aplica QSS y colores de Matplotlib. `name` es 'dark' o 'light'."""
     dark = name != "light"
     app.setStyleSheet(DARK_QSS if dark else LIGHT_QSS)
-    face = "#101418" if dark else "#f3f5f8"
-    text = INK_DARK if dark else INK_LIGHT
-    grid = "#2a3440" if dark else "#cbd5e1"
+    palette = plot_palette(name)
     rcParams.update(
         {
-            "figure.facecolor": face,
-            "axes.facecolor": face,
-            "axes.edgecolor": grid,
-            "axes.labelcolor": text,
-            "xtick.color": text,
-            "ytick.color": text,
-            "text.color": text,
-            "axes.titlecolor": text,
-            "grid.color": grid,
-            "legend.facecolor": face,
-            "legend.edgecolor": face,
-            "savefig.facecolor": face,
-            "font.size": 9,
-            "axes.titlesize": 10,
-            "axes.labelsize": 9,
+            "figure.facecolor": palette.face,
+            "axes.facecolor": palette.face,
+            "axes.edgecolor": palette.grid,
+            "axes.labelcolor": palette.text,
+            "xtick.color": palette.text,
+            "ytick.color": palette.text,
+            "text.color": palette.text,
+            "axes.titlecolor": palette.text,
+            "grid.color": palette.grid,
+            "legend.facecolor": palette.face,
+            "legend.edgecolor": palette.grid,
+            "savefig.facecolor": palette.face,
+            "font.size": 10,
+            "axes.titlesize": 12,
+            "axes.labelsize": 11,
         }
     )
