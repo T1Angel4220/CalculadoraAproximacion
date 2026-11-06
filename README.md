@@ -121,35 +121,6 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 Luego vuelve a ejecutar `.\.venv\Scripts\Activate.ps1`.
 
-### Linux / macOS
-
-```bash
-git clone https://github.com/<usuario>/<repositorio>.git
-cd <repositorio>
-
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -U pip
-pip install -e ".[dev]"
-
-python -m aproxlab.main
-```
-
-En la app: menú **Ejemplos** → un conjunto canónico → **Ajustar**.
-
-### Pruebas (opcional)
-
-```powershell
-python -m pytest
-```
-
-## Pruebas automatizadas
-
-```powershell
-python -m pytest
-python -m ruff check src tests
-python -m ruff format --check src tests
-```
 
 Datos canónicos de la guía:
 
@@ -174,20 +145,3 @@ Ocho diagramas Mermaid en [`docs/flowcharts/`](docs/flowcharts/), alineados con 
 | 8. Menú principal | [`08-menu-principal.md`](docs/flowcharts/08-menu-principal.md) |
 
 GitHub renderiza el Mermaid al abrir cada archivo. Para Word/PDF: copiar el bloque en [mermaid.live](https://mermaid.live) y exportar PNG.
-
-## Empaquetado Windows (opcional)
-
-```powershell
-pip install pyinstaller
-pyinstaller --noconfirm --windowed --name AproxLab src/aproxlab/main.py
-```
-
-## Mejoras futuras
-
-- Estrategias exponencial y logarítmica (la Strategy ya lo permite).
-- Validación cruzada o AIC cuando \(n\) sea mayor.
-- Worker `QThread` si se importan CSV masivos (hoy \(n\) académico cabe en el hilo de UI).
-
-## Licencia
-
-MIT. Ver [`LICENSE`](LICENSE).
