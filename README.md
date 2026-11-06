@@ -43,6 +43,14 @@ Un menor SSE del polinomio **no** implica automáticamente un mejor modelo predi
 
 Sin servidores, APIs ni base de datos. Todo corre en local.
 
+## Capturas
+
+Gráficas generadas con el conjunto de ejemplo *Crecimiento de laboratorio* (mismos servicios que usa la GUI):
+
+![Recta de ajuste](docs/screenshots/lineal.png)
+![Ajuste cuadrático](docs/screenshots/cuadratico.png)
+![Comparativa de modelos](docs/screenshots/comparativa.png)
+
 ## Arquitectura
 
 ```text
