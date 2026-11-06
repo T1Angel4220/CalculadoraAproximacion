@@ -160,7 +160,20 @@ Están en **Ejemplos** del menú y en `examples/`.
 
 ## Diagramas de flujo
 
-Ocho diagramas Mermaid en [`docs/flowcharts/`](docs/flowcharts/), alineados con las funciones reales (menú, validación, lineal, cuadrático, métricas, comparación, gráficas y flujo general).
+Ocho diagramas Mermaid en [`docs/flowcharts/`](docs/flowcharts/), alineados con las funciones del código.
+
+| Guía | Archivo |
+|------|---------|
+| **7. Flujo general** (inicio → menú → datos → métodos → resultados → salida) | [`01-general.md`](docs/flowcharts/01-general.md) |
+| 8. Ingreso y validación | [`02-ingreso-validacion.md`](docs/flowcharts/02-ingreso-validacion.md) |
+| 8. Ajuste lineal | [`03-ajuste-lineal.md`](docs/flowcharts/03-ajuste-lineal.md) |
+| 8. Ajuste cuadrático | [`04-ajuste-cuadratico.md`](docs/flowcharts/04-ajuste-cuadratico.md) |
+| 8. Errores e indicadores | [`05-errores-indicadores.md`](docs/flowcharts/05-errores-indicadores.md) |
+| 8. Comparación | [`06-comparacion-modelos.md`](docs/flowcharts/06-comparacion-modelos.md) |
+| 8. Gráficas | [`07-graficas.md`](docs/flowcharts/07-graficas.md) |
+| 8. Menú principal | [`08-menu-principal.md`](docs/flowcharts/08-menu-principal.md) |
+
+GitHub renderiza el Mermaid al abrir cada archivo. Para Word/PDF: copiar el bloque en [mermaid.live](https://mermaid.live) y exportar PNG.
 
 ## Empaquetado Windows (opcional)
 

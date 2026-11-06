@@ -14,4 +14,4 @@
 | 10 | Comprobar con un conjunto de datos y coherencia numérico-gráfica | `examples/` + pruebas canónicas + ejecución de la app |
 | 11 | Analizar qué modelo es mejor y justificar | `ComparisonView` (SSE, R² ajustado, nota de anidamiento) + README |
 
-Funcionalidades extra (no sustituyen lo obligatorio): CSV, exportar PNG, ejemplos, tema claro/oscuro, fórmulas.
+Funcionalidades extra (no sustituyen lo obligatorio): exportar PNG/TXT, ejemplos, tema claro/oscuro, fórmulas.
