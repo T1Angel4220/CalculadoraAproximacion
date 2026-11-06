@@ -1,4 +1,4 @@
-"""Resultados del ajuste lineal, en formato de laboratorio."""
+"""Ajuste lineal: indicadores exigidos por la guía APE 04 §3."""
 
 from __future__ import annotations
 
@@ -10,26 +10,27 @@ from aproxlab.ui.widgets.math_label import MathLabel
 from aproxlab.ui.widgets.parameter_table import ParameterTable
 
 _ROWS = [
-    ("a₀", "Intersección"),
-    ("a₁", "Pendiente"),
-    ("SSE", "Suma de cuadrados de residuos"),
+    ("Intersección", "Coeficiente a₀ (corte con y)"),
+    ("Pendiente", "Coeficiente a₁"),
+    ("Ecuación", "Recta de ajuste"),
+    ("SSE", "Suma de cuadrados de los residuos"),
     ("SST", "Suma total de cuadrados"),
-    ("Sᵧₓ", "Error estándar del estimado, ν = n − 2"),
+    ("Syx", "Error estándar del estimado"),
     ("R²", "Coeficiente de determinación"),
-    ("r", "Correlación de Pearson (x, y)"),
+    ("r", "Coeficiente de correlación (Pearson x, y)"),
 ]
 
 
 class LinearView(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self._hint = QLabel("Sin ajuste. Cargue observaciones y pulse Ajustar.")
+        self._hint = QLabel("Sin ajuste. Ingrese pares (x, y) y pulse Ajustar (F5).")
         self._hint.setObjectName("Subtitle")
         self._math = MathLabel(r"\hat{y} = a_0 + a_1 x")
         self._table = ParameterTable(_ROWS)
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 8)
-        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
         layout.addWidget(self._hint)
         layout.addWidget(self._math)
         layout.addWidget(self._table)
@@ -43,12 +44,13 @@ class LinearView(QWidget):
         metrics = report.linear_metrics
         a0 = float(fit.coefficients[0])
         a1 = float(fit.coefficients[1])
-        self._hint.setText(f"MCO lineal · n = {report.x.size} · p = 2")
+        self._hint.setText(f"Ajuste lineal por mínimos cuadrados · n = {report.x.size}")
         self._math.set_latex(rf"\hat{{y}} = {fmt_number(a0)} + ({fmt_number(a1)})\,x")
         self._table.set_values(
             [
                 fmt_number(a0),
                 fmt_number(a1),
+                fit.equation,
                 fmt_number(metrics.sse),
                 fmt_number(metrics.sst),
                 fmt_number(metrics.std_error),

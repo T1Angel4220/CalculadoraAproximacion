@@ -1,9 +1,9 @@
-"""Resultados del polinomio de grado 2, con residuos en tabla."""
+"""Ajuste cuadrático: coeficientes, ecuación, ŷ, residuos y SSE (guía §4)."""
 
 from __future__ import annotations
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QAbstractItemView,
     QHeaderView,
     QLabel,
     QTableWidget,
@@ -16,39 +16,39 @@ from aproxlab.services.analysis import AnalysisReport
 from aproxlab.ui.formatters import fmt_number
 from aproxlab.ui.widgets.math_label import MathLabel
 from aproxlab.ui.widgets.parameter_table import ParameterTable
+from aproxlab.ui.widgets.table_fit import configure_report_table
 
 _ROWS = [
-    ("a₀", "Término independiente"),
-    ("a₁", "Coeficiente lineal"),
-    ("a₂", "Coeficiente cuadrático"),
-    ("SSE", "Suma de cuadrados de residuos"),
-    ("Sᵧₓ", "Error estándar, ν = n − 3"),
-    ("R²", "Coeficiente de determinación"),
+    ("a₀", "Primer coeficiente"),
+    ("a₁", "Segundo coeficiente"),
+    ("a₂", "Tercer coeficiente"),
+    ("Ecuación", "Polinomio obtenido"),
+    ("SSE", "Suma de cuadrados de los residuos"),
 ]
 
 
 class QuadraticView(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self._hint = QLabel("Requiere n ≥ 3 y al menos tres x distintos.")
+        self._hint = QLabel("Requiere n ≥ 3 y al menos tres valores distintos de x.")
         self._hint.setObjectName("Subtitle")
         self._math = MathLabel(r"\hat{y} = a_0 + a_1 x + a_2 x^{2}")
         self._params = ParameterTable(_ROWS)
+        self._residuos_label = QLabel("Valores aproximados (ŷ) y residuos")
+        self._residuos_label.setObjectName("Title")
         self._table = QTableWidget(0, 5)
-        self._table.setHorizontalHeaderLabels(["x", "y", "ŷ", "eᵢ", "eᵢ²"])
-        self._table.verticalHeader().hide()
-        self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self._table.setAlternatingRowColors(True)
+        self._table.setHorizontalHeaderLabels(["x", "y", "ŷ aproximado", "residuo", "residuo²"])
+        configure_report_table(self._table)
+        self._table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self._table.verticalHeader().setDefaultSectionSize(22)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 8)
-        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
         layout.addWidget(self._hint)
         layout.addWidget(self._math)
         layout.addWidget(self._params)
-        layout.addWidget(QLabel("Residuos eᵢ = yᵢ − ŷᵢ"))
+        layout.addWidget(self._residuos_label)
         layout.addWidget(self._table, 1)
 
     def set_ink(self, color: str) -> None:
@@ -56,9 +56,8 @@ class QuadraticView(QWidget):
 
     def show_report(self, report: AnalysisReport) -> None:
         fit = report.quadratic
-        metrics = report.quadratic_metrics
         coeffs = [float(c) for c in fit.coefficients]
-        self._hint.setText(f"MCO grado 2 · n = {report.x.size} · p = 3")
+        self._hint.setText(f"Ajuste polinomial de segundo grado · n = {report.x.size}")
         self._math.set_latex(
             rf"\hat{{y}} = {fmt_number(coeffs[0])}"
             rf" + ({fmt_number(coeffs[1])})\,x"
@@ -69,9 +68,8 @@ class QuadraticView(QWidget):
                 fmt_number(coeffs[0]),
                 fmt_number(coeffs[1]),
                 fmt_number(coeffs[2]),
-                fmt_number(metrics.sse),
-                fmt_number(metrics.std_error),
-                fmt_number(metrics.r_squared),
+                fit.equation,
+                fmt_number(report.quadratic_metrics.sse),
             ]
         )
         n = report.x.size
@@ -86,4 +84,7 @@ class QuadraticView(QWidget):
                 fmt_number(residual**2),
             ]
             for col, value in enumerate(values):
-                self._table.setItem(i, col, QTableWidgetItem(value))
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                self._table.setItem(i, col, item)
+        self._table.resizeRowsToContents()

@@ -24,10 +24,14 @@ class ChartsView(QWidget):
         self._tabs.addTab(self._linear, "Recta")
         self._tabs.addTab(self._quadratic, "Parábola")
         self._tabs.addTab(self._both, "Ambos")
+        self.setMinimumHeight(260)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self._tabs)
+
+    def set_current(self, index: int) -> None:
+        self._tabs.setCurrentIndex(index)
 
     def show_report(self, report: AnalysisReport) -> None:
         plot_scatter_and_fits(
@@ -35,7 +39,7 @@ class ChartsView(QWidget):
             report.x,
             report.y,
             [(report.linear, _LINEAR_COLOR)],
-            title="Observados vs. MCO lineal",
+            title="Datos originales y recta de ajuste lineal",
         )
         self._linear.draw()
         plot_scatter_and_fits(
@@ -43,7 +47,7 @@ class ChartsView(QWidget):
             report.x,
             report.y,
             [(report.quadratic, _QUAD_COLOR)],
-            title="Observados vs. MCO grado 2",
+            title="Datos originales y curva de ajuste polinomial",
         )
         self._quadratic.draw()
         plot_scatter_and_fits(
@@ -51,7 +55,7 @@ class ChartsView(QWidget):
             report.x,
             report.y,
             [(report.linear, _LINEAR_COLOR), (report.quadratic, _QUAD_COLOR)],
-            title="Comparación de modelos",
+            title="Datos originales y ambos modelos",
         )
         self._both.draw()
 

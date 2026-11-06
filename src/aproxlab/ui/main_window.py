@@ -50,20 +50,25 @@ class MainWindow(QMainWindow):
         self._results.addTab(self._comparison, "Comparación")
         self._results.addTab(self._formulas, "Referencia")
 
+        self._results.setMinimumHeight(300)
         results_split = QSplitter(Qt.Orientation.Vertical)
         results_split.addWidget(self._results)
         results_split.addWidget(self._charts)
         results_split.setStretchFactor(0, 3)
         results_split.setStretchFactor(1, 2)
-        results_split.setSizes([480, 320])
+        results_split.setSizes([520, 280])
+        results_split.setChildrenCollapsible(False)
 
+        self._data.setMinimumWidth(250)
         split = QSplitter(Qt.Orientation.Horizontal)
         split.addWidget(self._data)
         split.addWidget(results_split)
         split.setStretchFactor(0, 0)
         split.setStretchFactor(1, 1)
-        split.setSizes([300, 1060])
+        split.setSizes([280, 1080])
+        split.setChildrenCollapsible(False)
         self.setCentralWidget(split)
+        self._results.currentChanged.connect(self._sync_chart_tab)
 
         self._build_toolbar()
         self._build_menus()
@@ -72,7 +77,6 @@ class MainWindow(QMainWindow):
 
     def _connect_presenter(self) -> None:
         presenter = self._presenter
-        self._data.calculate_requested.connect(presenter.calculate)
         presenter.analysis_ready.connect(self._on_ready)
         presenter.analysis_failed.connect(self._on_failed)
         presenter.dataset_loaded.connect(self._on_dataset_loaded)
@@ -84,7 +88,6 @@ class MainWindow(QMainWindow):
         bar.addAction(self._action("Ajustar", self._fit_from_table, QKeySequence("F5")))
         bar.addSeparator()
         bar.addAction(self._action("CSV…", self._import_csv, QKeySequence.StandardKey.Open))
-        bar.addAction(self._action("Exportar…", self._export_report))
         bar.addAction(self._action("PNG…", self._export_chart))
         bar.addSeparator()
         self._examples = QComboBox()
@@ -145,12 +148,16 @@ class MainWindow(QMainWindow):
         self._quadratic.show_report(report)
         self._comparison.show_report(report)
         self._charts.show_report(report)
+        self._sync_chart_tab(self._results.currentIndex())
         lin = report.linear_metrics
         quad = report.quadratic_metrics
         self.statusBar().showMessage(
             f"n={report.x.size}  ·  SSE_lin={fmt_number(lin.sse)}  ·  "
             f"SSE_quad={fmt_number(quad.sse)}  ·  min SSE: {report.comparison.winner_name}"
         )
+
+    def _sync_chart_tab(self, index: int) -> None:
+        self._charts.set_current({0: 0, 1: 1, 2: 2, 3: 2}.get(index, 0))
 
     def _on_failed(self, message: str) -> None:
         self._data.show_error(message)

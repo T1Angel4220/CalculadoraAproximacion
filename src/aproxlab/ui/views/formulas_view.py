@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from PySide6.QtWidgets import QFrame, QGridLayout, QLabel, QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QFrame,
+    QGridLayout,
+    QLabel,
+    QScrollArea,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
 from aproxlab.ui.widgets.math_label import MathLabel
 
@@ -59,6 +67,7 @@ class _FormulaCard(QFrame):
     def __init__(self, title: str, latex: str, note: str, *, color: str) -> None:
         super().__init__()
         self.setObjectName("Card")
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         self._latex = latex
         heading = QLabel(title.upper())
         heading.setObjectName("MetricName")
@@ -91,6 +100,7 @@ class FormulasView(QWidget):
         inner_layout.setContentsMargins(8, 8, 8, 8)
         inner_layout.addWidget(intro)
         inner_layout.addLayout(grid)
+        inner_layout.addStretch(1)
         color = "#e7ecf3"
         for i, (title, latex, note) in enumerate(_BLOCKS):
             card = _FormulaCard(title, latex, note, color=color)

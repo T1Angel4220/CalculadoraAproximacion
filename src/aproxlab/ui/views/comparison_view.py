@@ -1,9 +1,9 @@
-"""Comparación de modelos en tabla de laboratorio."""
+"""Comparación de lineal vs cuadrático (requisito 5 y 11 de la guía)."""
 
 from __future__ import annotations
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QAbstractItemView,
     QHeaderView,
     QLabel,
     QTableWidget,
@@ -14,60 +14,101 @@ from PySide6.QtWidgets import (
 
 from aproxlab.services.analysis import AnalysisReport
 from aproxlab.ui.formatters import fmt_number
-from aproxlab.ui.widgets.math_label import MathLabel
+from aproxlab.ui.widgets.table_fit import configure_report_table, fit_table_height
 
 
 class ComparisonView(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self._verdict = QLabel("Sin modelos calculados.")
+        self._verdict = QLabel("Calcule un ajuste para comparar los dos modelos.")
         self._verdict.setObjectName("Title")
-        self._math = MathLabel(r"\min SSE,\quad SSE=\sum_i(y_i-\hat{y}_i)^2")
-        self._table = QTableWidget(2, 7)
-        self._table.setHorizontalHeaderLabels(["Modelo", "p", "ν", "SSE", "Sᵧₓ", "R²", "R²_adj"])
-        self._table.verticalHeader().hide()
-        self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self._table.setFixedHeight(24 * 2 + 32)
-        self._note = QLabel(
-            "El polinomio de grado 2 contiene a la recta (a₂ = 0). "
-            "Menor SSE de entrenamiento no implica mejor predicción. "
-            "Use Sᵧₓ y R² ajustado, que penalizan el parámetro extra."
-        )
-        self._note.setObjectName("Subtitle")
-        self._note.setWordWrap(True)
+        self._verdict.setWordWrap(True)
+
+        self._table = QTableWidget(2, 5)
+        self._table.setHorizontalHeaderLabels(["Modelo", "Ecuación", "SSE (error)", "Syx", "R²"])
+        configure_report_table(self._table)
+        fit_table_height(self._table)
+
+        self._analysis = QLabel("")
+        self._analysis.setObjectName("Subtitle")
+        self._analysis.setWordWrap(True)
+        self._analysis.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 8)
-        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
         layout.addWidget(self._verdict)
-        layout.addWidget(self._math)
         layout.addWidget(self._table)
-        layout.addWidget(self._note)
+        layout.addWidget(self._analysis)
         layout.addStretch(1)
 
-    def set_ink(self, color: str) -> None:
-        self._math.set_latex(self._math._latex, color=color)
+    def set_ink(self, color: str) -> None:  # noqa: ARG002
+        return
 
     def show_report(self, report: AnalysisReport) -> None:
+        lin = report.linear
+        quad = report.quadratic
+        m_lin = report.linear_metrics
+        m_quad = report.quadratic_metrics
         winner = report.comparison.winner_name
-        if winner == "Empate":
-            self._verdict.setText("SSE idéntico: la parábola colapsa a la recta (a₂ ≈ 0).")
-        else:
-            self._verdict.setText(f"Menor SSE de entrenamiento: {winner}.")
+
         rows = [
-            (report.linear.name, report.linear_metrics),
-            (report.quadratic.name, report.quadratic_metrics),
+            [
+                lin.name,
+                lin.equation,
+                fmt_number(m_lin.sse),
+                fmt_number(m_lin.std_error),
+                fmt_number(m_lin.r_squared),
+            ],
+            [
+                quad.name,
+                quad.equation,
+                fmt_number(m_quad.sse),
+                fmt_number(m_quad.std_error),
+                fmt_number(m_quad.r_squared),
+            ],
         ]
-        for i, (name, metrics) in enumerate(rows):
-            values = [
-                name,
-                str(metrics.parameter_count),
-                str(metrics.n - metrics.parameter_count),
-                fmt_number(metrics.sse),
-                fmt_number(metrics.std_error),
-                fmt_number(metrics.r_squared),
-                fmt_number(metrics.adjusted_r_squared),
-            ]
+        for i, values in enumerate(rows):
             for col, value in enumerate(values):
-                self._table.setItem(i, col, QTableWidgetItem(value))
+                item = QTableWidgetItem(value)
+                if col >= 2:
+                    item.setTextAlignment(
+                        Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+                    )
+                self._table.setItem(i, col, item)
+
+        header = self._table.horizontalHeader()
+        self._table.resizeColumnsToContents()
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        fit_table_height(self._table)
+
+        if winner == "Empate":
+            self._verdict.setText(
+                "Menor error: empate. Ambos modelos tienen el mismo SSE; "
+                "la parábola se reduce a la recta (a₂ ≈ 0)."
+            )
+        else:
+            self._verdict.setText(f"Menor error de ajuste (SSE): {winner}.")
+
+        self._analysis.setText(
+            _analysis_text(winner, m_lin.sse, m_quad.sse, m_lin.r_squared, m_quad.r_squared)
+        )
+
+
+def _analysis_text(
+    winner: str,
+    sse_lin: float,
+    sse_quad: float,
+    r2_lin: float | None,
+    r2_quad: float | None,
+) -> str:
+    r2l = fmt_number(r2_lin)
+    r2q = fmt_number(r2_quad)
+    return (
+        f"SSE lineal = {fmt_number(sse_lin)}; SSE cuadrático = {fmt_number(sse_quad)}. "
+        f"R² lineal = {r2l}; R² cuadrático = {r2q}. "
+        "El polinomio de grado 2 incluye a la recta como caso particular (a₂ = 0), "
+        "así que un SSE menor no garantiza por sí solo mejor predicción fuera de la muestra. "
+        "La gráfica comparativa debe coincidir con estos indicadores: "
+        f"el modelo con menor SSE es {winner}."
+    )

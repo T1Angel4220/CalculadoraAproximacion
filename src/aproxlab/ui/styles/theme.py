@@ -62,6 +62,7 @@ QTableView, QTableWidget {
     font-family: "Cascadia Mono", "Consolas", monospace;
     font-size: 12px;
 }
+QTableView::item, QTableWidget::item { padding: 6px 10px; }
 QHeaderView::section {
     background-color: #1c2430;
     color: #c5d0dc;
@@ -151,6 +152,7 @@ QTableView, QTableWidget {
     font-family: "Cascadia Mono", "Consolas", monospace;
     font-size: 12px;
 }
+QTableView::item, QTableWidget::item { padding: 6px 10px; }
 QHeaderView::section {
     background-color: #e8edf3;
     color: #334155;
