@@ -24,7 +24,7 @@ Un menor SSE del polinomio **no** implica automáticamente un mejor modelo predi
 - Regresión lineal y cuadrática por `numpy.linalg.lstsq` (sin invertir \(X^\top X\)).
 - Comparación por SSE, con \(S_{yx}\) y \(R^2\) ajustado como apoyo.
 - Gráficas Matplotlib embebidas (leyenda, ejes, título).
-- Importar CSV, exportar reporte `.txt`, exportar PNG.
+- Exportar reporte `.txt` y gráficas PNG.
 - Tres conjuntos de ejemplo (incluidos los canónicos de la guía).
 - Tema oscuro por defecto y tema claro.
 - Página de fórmulas e interpretación de indicadores.
@@ -95,24 +95,52 @@ SSE \(= \sum (y_i-\hat y_i)^2\), SST \(= \sum (y_i-\bar y)^2\), \(R^2 = 1-\mathr
 
 **Casos degenerados.** \(n\) insuficiente, \(x\) constante, \(y\) constante (\(R^2\) indefinido), datos no finitos.
 
-## Instalación
+## Inicio rápido (después de clonar)
+
+Requisito: **Python 3.11 o superior** (`python --version`).
+
+### Windows (PowerShell)
 
 ```powershell
+git clone https://github.com/<usuario>/<repositorio>.git
+cd <repositorio>
+
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+python -m pip install -U pip
 pip install -e ".[dev]"
-```
 
-## Ejecución
-
-```powershell
 python -m aproxlab.main
 ```
 
-o, tras la instalación editable:
+Si PowerShell bloquea la activación del entorno:
 
 ```powershell
-aproxlab
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+Luego vuelve a ejecutar `.\.venv\Scripts\Activate.ps1`.
+
+### Linux / macOS
+
+```bash
+git clone https://github.com/<usuario>/<repositorio>.git
+cd <repositorio>
+
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+pip install -e ".[dev]"
+
+python -m aproxlab.main
+```
+
+En la app: menú **Ejemplos** → un conjunto canónico → **Ajustar**.
+
+### Pruebas (opcional)
+
+```powershell
+python -m pytest
 ```
 
 ## Pruebas automatizadas
