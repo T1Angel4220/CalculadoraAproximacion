@@ -30,6 +30,14 @@ CANONICAL_QUADRATIC = ExampleDataset(
     y=(1.0, 2.0, 5.0, 10.0, 17.0),
 )
 
+CLASS_LINEAR = ExampleDataset(
+    key="class_linear",
+    title="Procedimiento de clase (recta)",
+    description="Datos del literal a: sumatorias, a0, a1, Sr, St, Sy/x, r² y r.",
+    x=(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0),
+    y=(1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 8.0, 10.0, 13.0),
+)
+
 LAB_GROWTH = ExampleDataset(
     key="lab_growth",
     title="Crecimiento de laboratorio",
@@ -39,6 +47,7 @@ LAB_GROWTH = ExampleDataset(
 )
 
 EXAMPLES: tuple[ExampleDataset, ...] = (
+    CLASS_LINEAR,
     CANONICAL_LINEAR,
     CANONICAL_QUADRATIC,
     LAB_GROWTH,

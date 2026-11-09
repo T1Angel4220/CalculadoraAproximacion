@@ -1,17 +1,19 @@
 # Ajuste lineal
 
-Corresponde a `LinearRegression.fit`.
+Corresponde a `LinearRegression.fit` (sumatorias a mano, sin NumPy ni lstsq).
 
 ```mermaid
 flowchart TD
-    A[Entrada x, y] --> B[prepare_dataset]
-    B --> C[require_min_points n ≥ 2]
-    C --> D{¿Al menos 2 x distintos?}
-    D -->|No| E[DegenerateDesignError]
-    D -->|Sí| F[Matriz de diseño 1 | x]
-    F --> G[np.linalg.lstsq]
-    G --> H[ŷ = X a]
-    H --> I[residuos = y - ŷ]
-    I --> J[Ecuación format_polynomial]
-    J --> K[FitResult lineal]
+    A[Entrada x, y] --> B[Validar n ≥ 2 y x no constante]
+    B --> C[1. Sumatorias: Σx, Σy, Σx², Σxy]
+    C --> D[2. Medias: x̄ = Σx/n, ȳ = Σy/n]
+    D --> E[3. a1 = nΣxy − ΣxΣy sobre nΣx² − (Σx)²]
+    E --> F[a0 = ȳ − a1 x̄]
+    F --> G[4. Para cada i: ŷi = a0 + a1 xi, ei = yi − ŷi]
+    G --> H[5. Sr = Σ e², St = Σ (yi − ȳ)²]
+    H --> I[6. Sy/x = √ Sr / n−2]
+    I --> J[7. r² = St − Sr sobre St]
+    J --> K[8. r = signo(a1) √r²]
+    K --> L[Interpretar r: fuerte / débil, positiva / negativa]
+    L --> M[FitResult + LinearWorksheet]
 ```

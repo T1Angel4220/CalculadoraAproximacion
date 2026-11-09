@@ -5,8 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-import numpy as np
-
 
 @dataclass(frozen=True, slots=True)
 class FitResult:
@@ -14,10 +12,11 @@ class FitResult:
 
     name: str
     degree: int
-    coefficients: np.ndarray
-    y_hat: np.ndarray
-    residuals: np.ndarray
+    coefficients: tuple[float, ...]
+    y_hat: tuple[float, ...]
+    residuals: tuple[float, ...]
     equation: str
+    worksheet: object | None = None
 
 
 class RegressionStrategy(Protocol):
@@ -27,12 +26,12 @@ class RegressionStrategy(Protocol):
     min_points: int
     degree: int
 
-    def fit(self, x: np.ndarray | list[float], y: np.ndarray | list[float]) -> FitResult:
+    def fit(self, x: list[float], y: list[float]) -> FitResult:
         """Ajusta el modelo y devuelve coeficientes, ŷ y residuos."""
         ...
 
 
-def format_polynomial_equation(coefficients: np.ndarray) -> str:
+def format_polynomial_equation(coefficients: tuple[float, ...] | list[float]) -> str:
     """Formatea y = a0 + a1 x + a2 x^2 … omitiendo términos nulos."""
     terms: list[str] = []
     for power, coef in enumerate(coefficients):
