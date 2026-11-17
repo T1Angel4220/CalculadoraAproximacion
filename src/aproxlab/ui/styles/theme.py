@@ -86,13 +86,38 @@ QLabel#MetricValue {
     font-family: "Cascadia Mono", "Consolas", monospace;
     color: #f8fafc;
 }
-QLabel#Analysis { font-size: 14px; color: #c5d0dc; }
+QLabel#Analysis {
+    font-size: 15px;
+    color: #dbe4ee;
+    line-height: 1.45;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+}
+QLabel#StepKicker {
+    color: #67e8f9;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
 QLabel#WinnerText { font-size: 16px; font-weight: 600; }
 QFrame#Winner {
     background-color: #0f3d3a;
     border: 1px solid #14b8a6;
     border-radius: 8px;
     padding: 4px;
+}
+QLabel#Badge {
+    background-color: #14532d;
+    color: #86efac;
+    border: 1px solid #22c55e;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-weight: 700;
+}
+QLabel#HeroValue {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    color: #4ade80;
 }
 QTabWidget::pane { border: 1px solid #2a3440; }
 QTabBar::tab {
@@ -196,12 +221,37 @@ QLabel#MetricValue {
     font-family: "Cascadia Mono", "Consolas", monospace;
     color: #0f172a;
 }
-QLabel#Analysis { font-size: 14px; color: #334155; }
+QLabel#Analysis {
+    font-size: 15px;
+    color: #334155;
+    line-height: 1.45;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+}
+QLabel#StepKicker {
+    color: #0e7490;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
 QLabel#WinnerText { font-size: 16px; font-weight: 600; }
 QFrame#Winner {
     background-color: #ecfdf5;
     border: 1px solid #14b8a6;
     border-radius: 8px;
+}
+QLabel#Badge {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #22c55e;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-weight: 700;
+}
+QLabel#HeroValue {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    color: #15803d;
 }
 QTabBar::tab {
     background: #e8edf3;

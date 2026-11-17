@@ -5,13 +5,14 @@ from __future__ import annotations
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QTableView, QVBoxLayout, QWidget
 
-from aproxlab.core.exceptions import DatasetError
+from aproxlab.core.exceptions import DatasetError, InsufficientDataError
 from aproxlab.ui.widgets.dataset_model import DatasetTableModel
 from aproxlab.ui.widgets.numeric_delegate import NumericDelegate
 
 
 class DataView(QWidget):
     fit_requested = Signal()
+    clear_requested = Signal()
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -43,8 +44,10 @@ class DataView(QWidget):
         add_btn = QPushButton("Agregar fila")
         del_btn = QPushButton("Eliminar fila")
         del_btn.setObjectName("Danger")
+        clear_btn = QPushButton("Limpiar")
         add_btn.clicked.connect(self.model.add_row)
         del_btn.clicked.connect(self._remove_selected)
+        clear_btn.clicked.connect(self.clear_requested.emit)
 
         fit_btn = QPushButton("Ajustar  (F5)")
         fit_btn.setObjectName("Primary")
@@ -54,6 +57,7 @@ class DataView(QWidget):
         buttons = QHBoxLayout()
         buttons.addWidget(add_btn)
         buttons.addWidget(del_btn)
+        buttons.addWidget(clear_btn)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
@@ -71,6 +75,11 @@ class DataView(QWidget):
     def clear_error(self) -> None:
         self._error.setText("")
 
+    def clear_all(self) -> None:
+        self.model.clear()
+        self.clear_error()
+        self._refresh_count()
+
     def load_pairs(self, x: list[float], y: list[float]) -> None:
         self.model.set_pairs(x, y)
         self.clear_error()
@@ -82,6 +91,9 @@ class DataView(QWidget):
     def _refresh_count(self) -> None:
         try:
             x, y = self.model.numeric_pairs()
+        except InsufficientDataError:
+            self._count.setText("n = 0")
+            return
         except DatasetError:
             filled = 0
             for row in range(self.model.rowCount()):

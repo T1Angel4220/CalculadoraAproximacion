@@ -50,9 +50,40 @@ def test_error_table_has_yhat_residual_and_squared_residual() -> None:
     assert len(steps.error_rows) == 9
 
 
+def test_error_table_matches_classroom_columns() -> None:
+    """Una sola tabla: ŷ de la recta, ei, ei², yi−ȳ y (yi−ȳ)²."""
+    steps = LinearRegression().fit(X, Y).worksheet
+    assert steps is not None
+    first = steps.error_rows[0]
+    last = steps.error_rows[-1]
+    assert first.y_hat == pytest.approx(-0.555556, rel=1e-4)
+    assert first.residual == pytest.approx(1.555556, rel=1e-4)
+    assert first.dev_mean == pytest.approx(-4.277778, rel=1e-5)
+    assert first.dev_mean_sq == pytest.approx(18.29938, rel=1e-4)
+    assert last.y_hat == pytest.approx(11.111111, rel=1e-4)
+    assert last.residual == pytest.approx(1.888889, rel=1e-4)
+    assert last.dev_mean == pytest.approx(7.722222, rel=1e-5)
+    assert last.dev_mean_sq == pytest.approx(59.63272, rel=1e-4)
+
+
+def test_error_table_includes_deviation_from_mean_y() -> None:
+    steps = LinearRegression().fit(X, Y).worksheet
+    assert steps is not None
+    first = steps.error_rows[0]
+    assert first.mean_y == pytest.approx(5.277778, rel=1e-6)
+    assert first.dev_mean == pytest.approx(1 - 5.277778, rel=1e-5)
+    assert first.dev_mean_sq == pytest.approx((1 - 5.277778) ** 2, rel=1e-5)
+    total_st = sum(row.dev_mean_sq for row in steps.error_rows)
+    assert total_st == pytest.approx(steps.st, rel=1e-9)
+
+
 def test_interpret_correlation_bands() -> None:
-    assert "fuerte" in interpret_correlation(0.95).lower()
-    assert "débil" in interpret_correlation(0.3).lower()
-    assert "débil" in interpret_correlation(-0.2).lower()
-    assert "fuerte" in interpret_correlation(-0.8).lower()
-    assert "negativa" in interpret_correlation(-0.8).lower()
+    assert interpret_correlation(0.95) == "Correlación positiva fuerte"
+    assert interpret_correlation(0.3) == "Correlación positiva débil"
+    assert interpret_correlation(-0.2) == "Correlación negativa débil"
+    assert interpret_correlation(-0.8) == "Correlación negativa fuerte"
+    for sample in (0.95, 0.3, -0.2, -0.8):
+        text = interpret_correlation(sample)
+        assert "0.5" not in text
+        assert "≤" not in text
+        assert ">=" not in text

@@ -58,6 +58,12 @@ class ChartsView(QWidget):
     def set_current(self, index: int) -> None:
         self._tabs.setCurrentIndex(index)
 
+    def clear(self) -> None:
+        self._report = None
+        for canvas in (self._linear, self._quadratic, self._both):
+            canvas.axes.clear()
+            canvas.draw()
+
     def show_report(self, report: AnalysisReport) -> None:
         self._report = report
         pal = self._palette

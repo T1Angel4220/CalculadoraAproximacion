@@ -69,6 +69,11 @@ class DatasetTableModel(QAbstractTableModel):
         if not self._rows:
             self.add_row()
 
+    def clear(self) -> None:
+        self.beginResetModel()
+        self._rows = [["", ""] for _ in range(5)]
+        self.endResetModel()
+
     def set_pairs(self, x: list[float], y: list[float]) -> None:
         self.beginResetModel()
         self._rows = [[_fmt(xi), _fmt(yi)] for xi, yi in zip(x, y, strict=True)]

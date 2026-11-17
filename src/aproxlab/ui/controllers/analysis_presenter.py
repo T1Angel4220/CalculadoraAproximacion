@@ -26,6 +26,9 @@ class AnalysisPresenter(QObject):
     def last_report(self) -> AnalysisReport | None:
         return self._last_report
 
+    def clear(self) -> None:
+        self._last_report = None
+
     def calculate(self, x: list[float], y: list[float]) -> None:
         try:
             report = self._service.analyze(x, y)

@@ -38,7 +38,7 @@ No se crearon interfaces artificiales para rellenar un checklist.
 - **MVC clásico con modelo Qt observable para coeficientes:** excesivo; los resultados son un snapshot inmutable por cálculo.
 - **VIPER / Clean Architecture con 15 carpetas:** sobreingeniería para ~dos algoritmos.
 - **Repository:** no hay persistencia más allá de CSV opcional.
-- **Invertir la matriz normal (`A.T @ A).I @ ...`:** inestable; se usa `lstsq` / `polyfit`.
+- **Invertir la matriz normal (`A.T @ A).I @ ...`:** no se invierten matrices. El código actual desarrolla la recta con sumatorias y el sistema cuadrático con Gauss-Jordan para mostrar cada operación de clase. NumPy se usa para validar vectores y construir las gráficas, no para resolver estos ajustes.
 - **QML:** la guía pide escritorio tipo laboratorio con tablas densas; Widgets encaja mejor.
 - **Un único `QTableWidget` + funciones sueltas en `main.py`:** cumpliría el PDF, no el portafolio.
 
@@ -50,3 +50,7 @@ No se crearon interfaces artificiales para rellenar un checklist.
 - Métricas compartidas para ambos modelos (DRY) en lugar de copiar SSE en cada Strategy.
 
 Si una función basta, se usa una función. Las clases existen donde hay estado o un contrato intercambiable.
+
+## Alcance numérico del desarrollo de clase
+
+Las sumatorias directas y las ecuaciones normales pueden perder precisión con datos mal condicionados o escalas extremas. La implementación actual está orientada a conjuntos académicos pequeños; para ampliar ese alcance conviene resolver con `numpy.linalg.lstsq` o `polyfit` y conservar por separado el desarrollo didáctico. Ocultar la matriz solo afecta la vista: el núcleo sigue calculando los mismos coeficientes y pasos.

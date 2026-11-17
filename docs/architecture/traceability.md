@@ -12,6 +12,6 @@
 | 8 | Diagramas por función (ingreso, lineal, cuadrático, errores, comparación, gráficas, menú) | `docs/flowcharts/02` … `08` |
 | 9 | Programa organizado en funciones independientes alineadas a los flujos | módulos `core/` y `services/` con los mismos nombres de responsabilidad |
 | 10 | Comprobar con un conjunto de datos y coherencia numérico-gráfica | `examples/` + pruebas canónicas + ejecución de la app |
-| 11 | Analizar qué modelo es mejor y justificar | `ComparisonView` (SSE, R² ajustado, nota de anidamiento) + README |
+| 11 | Analizar qué modelo es mejor y justificar | `compare_models` + `narrate_comparison` + `ComparisonView` (SSE, reducción SSE, SST, Syx, R² y lectura de r); limitaciones en README |
 
-Funcionalidades extra (no sustituyen lo obligatorio): exportar PNG/TXT, ejemplos, tema claro/oscuro, fórmulas.
+Funcionalidades extra (no sustituyen lo obligatorio): exportar PNG/TXT, ejemplos, tema claro/oscuro, limpieza completa del espacio de trabajo y ocultar/mostrar el desarrollo matricial sin recalcular. Los recorridos de limpieza, recuperación tras error y visibilidad de matriz se verifican en `tests/test_workspace.py`.

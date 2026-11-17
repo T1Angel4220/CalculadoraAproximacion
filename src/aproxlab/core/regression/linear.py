@@ -19,6 +19,9 @@ class ErrorRow:
     y_hat: float
     residual: float
     residual_sq: float
+    mean_y: float
+    dev_mean: float
+    dev_mean_sq: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,16 +47,16 @@ class LinearWorksheet:
 
 
 def interpret_correlation(r: float | None) -> str:
-    """Interpreta r según las bandas pedidas por el curso."""
+    """Interpreta r según las bandas pedidas por el curso (sin umbrales en el texto)."""
     if r is None:
         return "No definido (St = 0 o x constante)"
     if r >= 0.5:
-        return "Correlación positiva fuerte (0.5 ≤ r ≤ 1)"
+        return "Correlación positiva fuerte"
     if r >= 0:
-        return "Correlación positiva débil (0 ≤ r < 0.5)"
+        return "Correlación positiva débil"
     if r > -0.5:
-        return "Correlación negativa débil (-0.5 < r < 0)"
-    return "Correlación negativa fuerte (-1 ≤ r ≤ -0.5)"
+        return "Correlación negativa débil"
+    return "Correlación negativa fuerte"
 
 
 def _sum(values: list[float]) -> float:
@@ -102,10 +105,12 @@ class LinearRegression:
         a1 = (n * sum_xy - sum_x * sum_y) / denom
         a0 = mean_y - a1 * mean_x
 
-        # 4. Tabla de errores: ŷ, e, e²
+        # 4. Tabla de errores: ŷ (recta), e = y−ŷ, y−ȳ y cuadrados
         y_hat = [a0 + a1 * xs[i] for i in range(n)]
         residuals = [ys[i] - y_hat[i] for i in range(n)]
         residual_sq = [residuals[i] * residuals[i] for i in range(n)]
+        dev_mean = [ys[i] - mean_y for i in range(n)]
+        dev_mean_sq = [dev_mean[i] * dev_mean[i] for i in range(n)]
         error_rows = tuple(
             ErrorRow(
                 x=xs[i],
@@ -115,13 +120,16 @@ class LinearRegression:
                 y_hat=y_hat[i],
                 residual=residuals[i],
                 residual_sq=residual_sq[i],
+                mean_y=mean_y,
+                dev_mean=dev_mean[i],
+                dev_mean_sq=dev_mean_sq[i],
             )
             for i in range(n)
         )
 
         # 5. Sr (suma de residuos al cuadrado) y St (suma total)
         sr = _sum(residual_sq)
-        st = _sum([(ys[i] - mean_y) ** 2 for i in range(n)])
+        st = _sum(dev_mean_sq)
 
         # 6. Error estándar Sy/x
         syx = math.sqrt(sr / (n - 2)) if n > 2 else None

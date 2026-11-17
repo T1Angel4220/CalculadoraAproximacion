@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
+    QPushButton,
     QSplitter,
     QTabWidget,
     QToolBar,
@@ -25,7 +26,6 @@ from aproxlab.ui.styles.theme import apply_theme, ink_color
 from aproxlab.ui.views.charts_view import ChartsView
 from aproxlab.ui.views.comparison_view import ComparisonView
 from aproxlab.ui.views.data_view import DataView
-from aproxlab.ui.views.formulas_view import FormulasView
 from aproxlab.ui.views.linear_view import LinearView
 from aproxlab.ui.views.quadratic_view import QuadraticView
 
@@ -43,7 +43,6 @@ class MainWindow(QMainWindow):
         self._linear = LinearView()
         self._quadratic = QuadraticView()
         self._comparison = ComparisonView()
-        self._formulas = FormulasView()
         self._charts = ChartsView()
         self._charts.set_palette(plot_palette(self._theme))
 
@@ -51,23 +50,24 @@ class MainWindow(QMainWindow):
         self._results.addTab(self._linear, "Lineal")
         self._results.addTab(self._quadratic, "Cuadrático")
         self._results.addTab(self._comparison, "Comparación")
-        self._results.addTab(self._formulas, "Referencia")
         self._results.tabBar().setExpanding(True)
         self._results.setDocumentMode(True)
 
         self._results.setMinimumHeight(300)
-        results_split = QSplitter(Qt.Orientation.Vertical)
-        results_split.addWidget(self._results)
-        results_split.addWidget(self._charts)
-        results_split.setStretchFactor(0, 3)
-        results_split.setStretchFactor(1, 2)
-        results_split.setSizes([420, 380])
-        results_split.setChildrenCollapsible(False)
+        self._charts_visible = True
+        self._chart_sizes = [420, 380]
+        self._results_split = QSplitter(Qt.Orientation.Vertical)
+        self._results_split.addWidget(self._results)
+        self._results_split.addWidget(self._charts)
+        self._results_split.setStretchFactor(0, 3)
+        self._results_split.setStretchFactor(1, 2)
+        self._results_split.setSizes(self._chart_sizes)
+        self._results_split.setChildrenCollapsible(True)
 
         self._data.setMinimumWidth(250)
         split = QSplitter(Qt.Orientation.Horizontal)
         split.addWidget(self._data)
-        split.addWidget(results_split)
+        split.addWidget(self._results_split)
         split.setStretchFactor(0, 0)
         split.setStretchFactor(1, 1)
         split.setSizes([280, 1080])
@@ -79,6 +79,7 @@ class MainWindow(QMainWindow):
         self._build_menus()
         self.statusBar().showMessage("n=0 · sin ajuste")
         self._connect_presenter()
+        self._load_classroom_example()
 
     def _connect_presenter(self) -> None:
         presenter = self._presenter
@@ -86,6 +87,7 @@ class MainWindow(QMainWindow):
         presenter.analysis_failed.connect(self._on_failed)
         presenter.dataset_loaded.connect(self._on_dataset_loaded)
         self._data.fit_requested.connect(self._fit_from_table)
+        self._data.clear_requested.connect(self._clear_workspace)
         fit_shortcut = QAction(self)
         fit_shortcut.setShortcut(QKeySequence("F5"))
         fit_shortcut.triggered.connect(self._fit_from_table)
@@ -102,12 +104,21 @@ class MainWindow(QMainWindow):
             self._examples.addItem(example.title, example.key)
         self._examples.currentIndexChanged.connect(self._example_chosen)
         bar.addWidget(self._examples)
+        bar.addSeparator()
+        clear_btn = QPushButton("Limpiar")
+        clear_btn.clicked.connect(self._clear_workspace)
+        bar.addWidget(clear_btn)
+        self._toggle_charts_btn = QPushButton("Ocultar gráficas")
+        self._toggle_charts_btn.clicked.connect(self._toggle_charts)
+        bar.addWidget(self._toggle_charts_btn)
 
     def _build_menus(self) -> None:
         file_menu = self.menuBar().addMenu("&Archivo")
         file_menu.addAction(self._action("Exportar resultados…", self._export_report))
         file_menu.addAction(self._action("Exportar gráfica PNG…", self._export_chart))
         file_menu.addAction(self._action("Exportar las tres gráficas…", self._export_all_charts))
+        file_menu.addSeparator()
+        file_menu.addAction(self._action("Limpiar", self._clear_workspace))
         file_menu.addSeparator()
         file_menu.addAction(self._action("Salir", self.close, QKeySequence.StandardKey.Quit))
 
@@ -123,6 +134,8 @@ class MainWindow(QMainWindow):
         view_menu = self.menuBar().addMenu("&Ver")
         view_menu.addAction(self._action("Tema oscuro", lambda: self._set_theme("dark")))
         view_menu.addAction(self._action("Tema claro", lambda: self._set_theme("light")))
+        view_menu.addSeparator()
+        view_menu.addAction(self._action("Ocultar/mostrar gráficas", self._toggle_charts))
 
         help_menu = self.menuBar().addMenu("A&yuda")
         help_menu.addAction(self._action("Acerca de AproxLab", self._about))
@@ -162,7 +175,7 @@ class MainWindow(QMainWindow):
         )
 
     def _sync_chart_tab(self, index: int) -> None:
-        self._charts.set_current({0: 0, 1: 1, 2: 2, 3: 2}.get(index, 0))
+        self._charts.set_current({0: 0, 1: 1, 2: 2}.get(index, 0))
 
     def _on_failed(self, message: str) -> None:
         self._data.show_error(message)
@@ -175,6 +188,25 @@ class MainWindow(QMainWindow):
 
     def _load_example(self, key: str) -> None:
         self._presenter.load_example(key)
+
+    def _clear_workspace(self) -> None:
+        self._examples.blockSignals(True)
+        self._examples.setCurrentIndex(0)
+        self._examples.blockSignals(False)
+        self._data.clear_all()
+        self._linear.clear()
+        self._quadratic.clear()
+        self._comparison.clear()
+        self._charts.clear()
+        self._presenter.clear()
+        self.statusBar().showMessage("n=0 · sin ajuste")
+
+    def _load_classroom_example(self) -> None:
+        index = self._examples.findData("class_linear")
+        if index < 0:
+            self._load_example("class_linear")
+            return
+        self._examples.setCurrentIndex(index)
 
     def _export_report(self) -> None:
         path, _ = QFileDialog.getSaveFileName(
@@ -204,6 +236,18 @@ class MainWindow(QMainWindow):
             written = self._charts.save_all_png(directory)
             self.statusBar().showMessage(f"{len(written)} PNG en {directory}")
 
+    def _toggle_charts(self) -> None:
+        if self._charts_visible:
+            self._chart_sizes = self._results_split.sizes()
+            self._charts.hide()
+            self._charts_visible = False
+            self._toggle_charts_btn.setText("Mostrar gráficas")
+            return
+        self._charts.show()
+        self._results_split.setSizes(self._chart_sizes)
+        self._charts_visible = True
+        self._toggle_charts_btn.setText("Ocultar gráficas")
+
     def _set_theme(self, name: str) -> None:
         from PySide6.QtWidgets import QApplication
 
@@ -217,7 +261,6 @@ class MainWindow(QMainWindow):
         self._linear.set_ink(color)
         self._quadratic.set_ink(color)
         self._comparison.set_ink(color)
-        self._formulas.set_ink(color)
 
     def _about(self) -> None:
         QMessageBox.about(

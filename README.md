@@ -15,19 +15,21 @@ Dado un conjunto de pares \((x_i, y_i)\), se busca una función simple que descr
 5. Tres gráficas (recta, parábola, comparativa).
 6. Diagramas de flujo alineados con el código.
 
-Un menor SSE del polinomio **no** implica automáticamente un mejor modelo predictivo: la parábola contiene a la recta como caso particular (\(a_2 = 0\)). La aplicación lo deja explícito.
+Un menor SSE del polinomio **no** implica automáticamente un mejor modelo predictivo: la parábola contiene a la recta como caso particular (\(a_2 = 0\)). La comparación por SSE describe el ajuste sobre los datos analizados.
 
 ## Funcionalidades
 
 - Tabla editable de pares \((x, y)\): agregar, editar y eliminar filas.
+- **Limpiar** en Datos, barra superior o Archivo: borra pares, resultados, desarrollo matricial, comparación, gráficas y reporte exportable; deja `n = 0`.
 - Validación: misma longitud, valores numéricos finitos, \(n\) suficiente y \(x\) no degenerados.
-- Regresión lineal y cuadrática por `numpy.linalg.lstsq` (sin invertir \(X^\top X\)).
-- Comparación por SSE, con \(S_{yx}\) y \(R^2\) ajustado como apoyo.
+- Regresión lineal con sumatorias y cuadrática con ecuaciones normales y Gauss-Jordan, mostrando fórmula, sustitución y resultado de los pasos.
+- **Ocultar / Mostrar cálculo de la matriz** en Cuadrático: controla ecuaciones normales, matriz aumentada y operaciones, sin recalcular ni ocultar coeficientes o errores. Se habilita cuando hay un resultado.
+- Comparación por SSE con tolerancia numérica, \(S_{yx}\), SST y \(R^2\); empate con recomendación lineal por simplicidad. El motor también calcula \(R^2\) ajustado.
 - Gráficas Matplotlib embebidas (leyenda, ejes, título).
 - Exportar reporte `.txt` y gráficas PNG.
-- Tres conjuntos de ejemplo (incluidos los canónicos de la guía).
+- Cuatro conjuntos de ejemplo (datos de clase, dos canónicos de la guía y crecimiento de laboratorio).
 - Tema oscuro por defecto y tema claro.
-- Página de fórmulas e interpretación de indicadores.
+- Comparación con reducción del SSE, R² y lectura de la correlación lineal.
 
 ## Tecnologías
 
@@ -35,9 +37,9 @@ Un menor SSE del polinomio **no** implica automáticamente un mejor modelo predi
 |-------|------------|
 | Lenguaje | Python ≥ 3.11 |
 | GUI | PySide6 (Qt Widgets) |
-| Álgebra | NumPy |
+| Cálculo | Sumatorias y Gauss-Jordan en Python; NumPy para validación y vectores gráficos |
 | Gráficas | Matplotlib |
-| Pruebas | pytest |
+| Pruebas | pytest + pytest-qt |
 | Lint / formato | Ruff |
 | Empaquetado | PyInstaller (opcional) |
 
@@ -87,11 +89,14 @@ No hay Repository: no hay persistencia estructurada más allá de CSV.
 
 ## Métodos numéricos
 
-**Lineal.** Se resuelve \(\min_a \|Xa - y\|_2\) con \(X = [\,1 \mid x\,]\).  
-SSE \(= \sum (y_i-\hat y_i)^2\), SST \(= \sum (y_i-\bar y)^2\), \(R^2 = 1-\mathrm{SSE}/\mathrm{SST}\) si SST \(> 0\),  
-\(S_{yx} = \sqrt{\mathrm{SSE}/(n-2)}\) si \(n>2\), \(r\) = Pearson\((x,y)\).
+**Lineal.** Se calcula \(a_1 = (n\sum xy-\sum x\sum y)/(n\sum x^2-(\sum x)^2)\) y \(a_0 = \bar y-a_1\bar x\).
 
-**Cuadrático.** \(X = [\,1 \mid x \mid x^2\,]\), mismos residuos; \(S_{yx}\) usa \(n-3\).
+SSE \(= \sum (y_i-\hat y_i)^2\), SST \(= \sum (y_i-\bar y)^2\), \(R^2 = 1-\mathrm{SSE}/\mathrm{SST}\) si SST \(>10^{-15}\),
+\(S_{yx} = \sqrt{\mathrm{SSE}/(n-2)}\) si \(n>2\), \(r = \operatorname{signo}(a_1)\sqrt{\max(R^2,0)}\), equivalente a Pearson para la recta ajustada con intercepto.
+
+**Cuadrático.** Las sumatorias forman el sistema normal de tres ecuaciones para \(a_0,a_1,a_2\). Gauss-Jordan registra las operaciones y matrices intermedias. Se calculan predicciones y residuos; \(S_{yx}\) usa \(n-3\). La vista interpreta \(R^2\), sin presentarlo como correlación lineal.
+
+El desarrollo actual usa sumatorias directas para conjuntos académicos; no usa `lstsq` ni invierte matrices. Las escalas extremas o los sistemas mal condicionados requieren una estrategia numérica más estable; véase [la decisión de arquitectura](docs/architecture/decisions.md#alcance-numérico-del-desarrollo-de-clase).
 
 **Casos degenerados.** \(n\) insuficiente, \(x\) constante, \(y\) constante (\(R^2\) indefinido), datos no finitos.
 
@@ -128,6 +133,22 @@ Datos canónicos de la guía:
 - Cuadrático: `y = [1,2,5,10,17]` → \(y = 1 + x^2\).
 
 Están en **Ejemplos** del menú y en `examples/`.
+
+Al abrir la aplicación se cargan y calculan los **Datos de clase**. Para empezar con datos propios, pulsa **Limpiar**, completa los pares y usa **Ajustar / F5**. También puedes seleccionar un ejemplo para cargarlo y calcularlo automáticamente. Limpiar conserva el tema y las preferencias de visibilidad.
+
+## Verificación
+
+Con el entorno virtual activado, desde la raíz:
+
+```powershell
+python -m pytest
+python -m ruff check src tests
+python -m ruff format --check src tests
+```
+
+`tests/test_workspace.py` comprueba las tres entradas de Limpiar, la eliminación del reporte anterior, la recuperación tras intentar ajustar sin datos y la visibilidad de la matriz sin recalcular.
+
+[Capturas de la limpieza, la matriz y la recuperación de la interfaz](docs/screenshots/controles-limpieza-matriz.png).
 
 ## Diagramas de flujo
 

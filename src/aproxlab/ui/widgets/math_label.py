@@ -7,7 +7,7 @@ from io import BytesIO
 from matplotlib.mathtext import math_to_image
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QLabel
+from PySide6.QtWidgets import QLabel, QSizePolicy
 
 
 class MathLabel(QLabel):
@@ -25,6 +25,8 @@ class MathLabel(QLabel):
         self._dpi = dpi
         self.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+        self.setScaledContents(False)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
         if latex:
             self.set_latex(latex, color=color)
 
@@ -38,8 +40,17 @@ class MathLabel(QLabel):
             math_to_image(expr, buf, dpi=self._dpi, format="png", color=self._color)
         except (ValueError, RuntimeError):
             self.setText(latex)
+            self.setMinimumSize(0, 28)
             return
         pixmap = QPixmap()
         pixmap.loadFromData(buf.getvalue())
         self.setPixmap(pixmap)
-        self.setMinimumHeight(pixmap.height())
+        self.setMinimumSize(pixmap.width(), pixmap.height())
+        self.setMaximumHeight(pixmap.height() + 8)
+
+    def clear_formula(self) -> None:
+        self._latex = ""
+        self.clear()
+        self.setText("")
+        self.setMinimumSize(0, 28)
+        self.setMaximumHeight(16777215)
